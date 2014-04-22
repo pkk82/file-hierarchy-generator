@@ -1,0 +1,7 @@
+.*
+!.gitignore
+target/
+test-output/
+felix-cache/
+*.iml
+*.log
