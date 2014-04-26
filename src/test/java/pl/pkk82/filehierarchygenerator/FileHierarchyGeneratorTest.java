@@ -1,9 +1,9 @@
-package pl.pkk.filehierarchygenerator;
+package pl.pkk82.filehierarchygenerator;
 
 
 import static org.assertj.core.api.Assertions.fail;
-import static pl.pkk.filehierarchygenerator.FileHierarchyAssertions.then;
-import static pl.pkk.filehierarchygenerator.FileHierarchyGenerator.createRootDirectory;
+import static pl.pkk82.filehierarchygenerator.FileHierarchyAssertions.then;
+import static pl.pkk82.filehierarchygenerator.FileHierarchyGenerator.createRootDirectory;
 
 import java.io.File;
 

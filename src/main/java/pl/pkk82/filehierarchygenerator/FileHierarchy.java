@@ -1,4 +1,4 @@
-package pl.pkk.filehierarchygenerator;
+package pl.pkk82.filehierarchygenerator;
 
 import java.io.File;
 import java.nio.file.Path;
