@@ -10,10 +10,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import pl.pkk82.filehierarchygenerator.util.TempWorkingDirectoryCreator;
+
 public class FileHierarchyGenerator {
 
 	private Path currentDirectory;
 	private Path currentFile;
+	private final TempWorkingDirectoryCreator tempWorkingDirectoryCreatorM;
 	private final List<Path> directoriesToCreate;
 	private final List<Path> filesToCreate;
 	private final Map<Path, List<String>> fileLines;
@@ -21,12 +24,11 @@ public class FileHierarchyGenerator {
 
 	public static FileHierarchyGenerator createRootDirectory(String rootDirectoryName) {
 		return new FileHierarchyGenerator(rootDirectoryName);
-
 	}
 
 	public FileHierarchy generate() {
 		try {
-			Path tempWorkingDirectory = createTempWorkingDirectory();
+			Path tempWorkingDirectory = tempWorkingDirectoryCreatorM.createTempWorkingDirectory();
 			Path rootDirectory = createDirectories(tempWorkingDirectory);
 			createFiles(tempWorkingDirectory);
 			return new FileHierarchy(rootDirectory);
@@ -77,6 +79,7 @@ public class FileHierarchyGenerator {
 		level = 0;
 		currentDirectory = Paths.get(rootDirectoryName);
 		directoriesToCreate.add(currentDirectory);
+		tempWorkingDirectoryCreatorM = new TempWorkingDirectoryCreator();
 	}
 
 	private Path createDirectories(Path tempWorkingDirectory) throws IOException {
@@ -100,10 +103,6 @@ public class FileHierarchyGenerator {
 				Files.write(fullPathToResolve, lines, Charset.forName("utf8"));
 			}
 		}
-	}
-
-	private Path createTempWorkingDirectory() throws IOException {
-		return Files.createTempDirectory("fhg");
 	}
 
 	private void validateLevel() {

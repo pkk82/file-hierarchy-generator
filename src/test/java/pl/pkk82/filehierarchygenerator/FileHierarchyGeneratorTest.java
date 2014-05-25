@@ -33,7 +33,7 @@ public class FileHierarchyGeneratorTest {
 		thenTempWorkingDirectory().isDirectory().has(new Condition<File>() {
 			@Override
 			public boolean matches(File file) {
-				return file.getName().matches("fhg\\d+");
+				return file.getName().matches("file-hierarchy-generator-\\d+");
 			}
 		});
 	}
