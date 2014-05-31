@@ -2,27 +2,26 @@ package pl.pkk82.filehierarchygenerator.xml;
 
 import java.io.IOException;
 import java.io.Writer;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import java.util.Arrays;
+import java.util.List;
 
 public class XmlWriter {
 
 	private XmlContent xmlContent;
+	private XmlDocument xmlDocument;
 	private boolean useEmptyTags = false;
 	private boolean keepLineBreaks = false;
 	private boolean useSpaceInEmptyTags = false;
 	private boolean useDeclaration = false;
+	private boolean useIndents = false;
 
 	public XmlWriter(XmlContent xmlContent) {
 		this.xmlContent = xmlContent;
 	}
 
-	public void writeTo(Writer writer) {
-		Document document = xmlContent.getDocument();
-		Element documentElement = document.getDocumentElement();
+	void writeTo(Writer writer) {
+		xmlDocument = XmlDocument.create(xmlContent);
+		XmlElement documentElement = xmlDocument.getDocumentElement();
 		if (documentElement != null) {
 			try {
 				writeDeclaration(writer);
@@ -31,6 +30,17 @@ public class XmlWriter {
 				throw new FileContentXmlGeneratorException(e);
 			}
 		}
+	}
+
+	void setFormatted() {
+		useEmptyTags = true;
+		useSpaceInEmptyTags = true;
+		keepLineBreaks = true;
+		useIndents = true;
+	}
+
+	void setDeclaration() {
+		useDeclaration = true;
 	}
 
 	private void writeDeclaration(Writer writer) throws IOException {
@@ -43,95 +53,87 @@ public class XmlWriter {
 		return System.getProperty("line.separator");
 	}
 
-	private void writeElement(Writer writer, Element element) throws IOException {
-		NodeList childNodes = element.getChildNodes();
-		if (childNodes.getLength() == 0) {
+	private void writeElement(Writer writer, XmlElement element) throws IOException {
+		List<XmlElement> childXmlElements = element.getChildren();
+		if (childXmlElements.isEmpty()) {
 			writeLastElement(writer, element);
 		} else {
-			writeElementWithChilds(writer, element, childNodes);
+			writeElementWithChilds(writer, element);
 		}
 
 	}
 
-	private void writeLastElement(Writer writer, Element element) throws IOException {
-		String tagName = element.getTagName();
+	private void writeLastElement(Writer writer, XmlElement element) throws IOException {
 		if (useEmptyTags) {
-			writeLastElementAsEmpty(writer, tagName);
+			writeLastElementAsEmpty(writer, element);
 		} else {
-			writeLastElement(writer, tagName);
+			writeLastElementNormally(writer, element);
 		}
 	}
 
-	private void writeLastElementAsEmpty(Writer writer, String tagName) throws IOException {
+	private void writeLastElementAsEmpty(Writer writer, XmlElement xmlElement) throws IOException {
 		if (useSpaceInEmptyTags) {
-			writer.write(createLastElementWithSpace(tagName));
+			writer.write(createLastElementWithSpace(xmlElement));
 		} else {
-			writer.write(createLastElement(tagName));
-		}
-
-	}
-
-	private void writeLastElement(Writer writer, String tagName) throws IOException {
-		writer.write(createStartTag(tagName));
-		writer.write(createEndTag(tagName));
-	}
-
-	private void writeElementWithChilds(Writer writer, Element element, NodeList childNodes) throws IOException {
-		String tagName = element.getTagName();
-		writer.write(createStartTag(tagName));
-		writeChildren(writer, childNodes);
-		writer.write(createEndTag(tagName));
-	}
-
-	private void writeChildren(Writer writer, NodeList nodeList) throws IOException {
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Node item = nodeList.item(i);
-			if (item instanceof Element) {
-				writeElement(writer, (Element) item);
-			}
+			writer.write(createLastElement(xmlElement));
 		}
 	}
 
+	private void writeLastElementNormally(Writer writer, XmlElement xmlElement) throws IOException {
+		writer.write(createStartTag(xmlElement));
+		writer.write(createEndTag(xmlElement));
+	}
 
-	private String createStartTag(String tagName) {
+
+	private void writeElementWithChilds(Writer writer, XmlElement element) throws IOException {
+		writer.write(createStartTag(element));
+		writeChildren(writer, element.getChildren());
+		writer.write(createEndTag(element));
+	}
+
+	private void writeChildren(Writer writer, List<XmlElement> xmlElements) throws IOException {
+		for (XmlElement xmlElement : xmlElements) {
+			writeElement(writer, xmlElement);
+		}
+	}
+
+	private String createStartTag(XmlElement xmlElement) {
+		return createElementWithStartAndStop(xmlElement, "<", ">");
+	}
+
+	private String createEndTag(XmlElement xmlElement) {
+		return createElementWithStartAndStop(xmlElement, "</", ">");
+	}
+
+	private String createLastElement(XmlElement xmlElement) {
+		return createElementWithStartAndStop(xmlElement, "<", "/>");
+	}
+
+	private String createLastElementWithSpace(XmlElement xmlElement) {
+		return createElementWithStartAndStop(xmlElement, "<", " />");
+	}
+
+	private String createElementWithStartAndStop(XmlElement xmlElement, String beforeTag, String afterTag) {
 		StringBuffer buffer = new StringBuffer();
-		buffer.append('<');
-		buffer.append(tagName);
-		buffer.append('>');
+		appendIndentTo(buffer, xmlElement);
+		buffer.append(beforeTag);
+		buffer.append(xmlElement.getTagName());
+		buffer.append(afterTag);
+		appendNewLineTo(buffer);
 		return buffer.toString();
 	}
 
-	private String createEndTag(String tagName) {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("</");
-		buffer.append(tagName);
-		buffer.append('>');
-		return buffer.toString();
+	private void appendIndentTo(StringBuffer buffer, XmlElement xmlElement) {
+		if (useIndents) {
+			char[] indent = new char[4 * xmlElement.getLevel()];
+			Arrays.fill(indent, ' ');
+			buffer.append(indent);
+		}
 	}
 
-	private String createLastElement(String tagName) {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append('<');
-		buffer.append(tagName);
-		buffer.append("/>");
-		return buffer.toString();
-	}
-
-	private String createLastElementWithSpace(String tagName) {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append('<');
-		buffer.append(tagName);
-		buffer.append(" />");
-		return buffer.toString();
-	}
-
-	public void setFormatted() {
-		useEmptyTags = true;
-		useSpaceInEmptyTags = true;
-		keepLineBreaks = true;
-	}
-
-	public void setDeclaration() {
-		useDeclaration = true;
+	private void appendNewLineTo(StringBuffer buffer) {
+		if (keepLineBreaks) {
+			buffer.append(getLineSeparator());
+		}
 	}
 }

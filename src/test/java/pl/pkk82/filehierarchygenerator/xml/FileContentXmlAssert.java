@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
+import com.google.common.collect.Iterables;
+
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.AbstractAssert;
 
 public class FileContentXmlAssert extends AbstractAssert<FileContentXmlAssert, FileContentXml> {
@@ -22,6 +25,9 @@ public class FileContentXmlAssert extends AbstractAssert<FileContentXmlAssert, F
 			lines = FileUtils.readLines(actual.getPath().toFile());
 		} catch (IOException e) {
 			throw new AssertionError(e);
+		}
+		if (StringUtils.EMPTY.equals(Iterables.getLast(lines, StringUtils.EMPTY))) {
+			lines.remove(lines.size() - 1);
 		}
 		assertThat(lines).containsExactly(expectedLines);
 		return this;

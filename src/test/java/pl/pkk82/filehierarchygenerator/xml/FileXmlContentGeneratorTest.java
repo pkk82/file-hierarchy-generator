@@ -71,6 +71,13 @@ public class FileXmlContentGeneratorTest {
 	}
 
 	@Test
+	public void shouldGenerateLeafInRootFormatted() {
+		givenXmlFile("root.xml").withElement("root").withElement("leaf").formatted();
+		whenGenerateXmlFile();
+		thenFileContentXml().containsLines("<root>", "    <leaf />", "</root>");
+	}
+
+	@Test
 	public void shouldGenerateLeavesInRoot() {
 		givenXmlFile("root.xml").withElement("root").withElement("leaf1").up().withElement("leaf2");
 		whenGenerateXmlFile();
