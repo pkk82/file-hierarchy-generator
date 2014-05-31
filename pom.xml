@@ -12,7 +12,7 @@
 	<artifactId>file-hierarchy-generator</artifactId>
 	<packaging>jar</packaging>
 	<name>File Hierarchy Generator</name>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.3-SNAPSHOT</version>
 	<description>A small library to create directory hierarchy with files in tests.</description>
 	<url>http://github.com/pkk82/file-hierarchy-generator/wiki</url>
 	<licenses>
