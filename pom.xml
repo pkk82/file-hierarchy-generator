@@ -10,7 +10,7 @@
 	<artifactId>file-hierarchy-generator</artifactId>
 	<packaging>jar</packaging>
 	<name>File Hierarchy Generator</name>
-	<version>0.5-SNAPSHOT</version>
+	<version>0.6-SNAPSHOT</version>
 	<description>A small library to create directory hierarchy with files in tests.</description>
 	<url>http://github.com/pkk82/file-hierarchy-generator/wiki</url>
 	<licenses>
@@ -84,8 +84,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
-				<version>2.2.2</version>
+				<version>2.5</version>
 				<configuration>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<useReleaseProfile>false</useReleaseProfile>
+					<releaseProfiles>release</releaseProfiles>
+					<goals>deploy</goals>
 					<arguments>-Dgpg.passphrase=${gpg.sonatype.passphrase}</arguments>
 				</configuration>
 			</plugin>
