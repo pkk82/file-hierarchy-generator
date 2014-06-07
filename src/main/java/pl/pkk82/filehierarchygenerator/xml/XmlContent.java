@@ -7,6 +7,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 import pl.pkk82.filehierarchygenerator.IllegalInvocationException;
 
@@ -35,6 +36,11 @@ public class XmlContent {
 		Element element = document.createElement(tagName);
 		currentElement.appendChild(element);
 		currentElement = element;
+	}
+
+	public void addText(String value) {
+		Text textNode = document.createTextNode(value);
+		currentElement.appendChild(textNode);
 	}
 
 	public Document getDocument() {

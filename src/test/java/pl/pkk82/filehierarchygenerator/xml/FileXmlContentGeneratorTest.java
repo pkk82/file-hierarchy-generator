@@ -85,6 +85,38 @@ public class FileXmlContentGeneratorTest {
 	}
 
 	@Test
+	public void shouldGenerateTagWithContent() {
+		givenXmlFile("root.xml").withElement("root").withText("rootValue");
+		whenGenerateXmlFile();
+		thenFileContentXml().containsLines("<root>rootValue</root>");
+	}
+
+	@Test
+	public void shouldGenerateTagWithContentFormatted() {
+		givenXmlFile("root.xml")
+				.withElement("root")
+				.withElement("subroot1")
+				.withText("value")
+				.up()
+				.withElement("subroot2")
+				.withElement("subroot21")
+				.withText("text21")
+				.up()
+				.withElement("subroot22")
+				.withText("text22")
+				.formatted();
+		whenGenerateXmlFile();
+		thenFileContentXml().containsLines(
+				"<root>",
+				"    <subroot1>value</subroot1>",
+				"    <subroot2>",
+				"        <subroot21>text21</subroot21>",
+				"        <subroot22>text22</subroot22>",
+				"    </subroot2>",
+				"</root>");
+	}
+
+	@Test
 	public void shouldNotAllowToUpOutsideRoot() {
 		givenXmlFile("root.xml").withElement("root");
 		try {

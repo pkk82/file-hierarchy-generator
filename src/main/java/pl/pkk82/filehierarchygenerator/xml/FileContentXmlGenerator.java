@@ -1,7 +1,6 @@
 package pl.pkk82.filehierarchygenerator.xml;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,7 +14,7 @@ public final class FileContentXmlGenerator {
 
 	private final TempWorkingDirectoryCreator tempWorkingDirectoryCreator;
 	private final XmlContent xmlContent;
-	private final XmlWriter xmlWriter;
+	private final XmlFormatter xmlFormatter;
 	private Path directory;
 	private final String fileName;
 
@@ -32,6 +31,11 @@ public final class FileContentXmlGenerator {
 	}
 
 
+	public FileContentXmlGenerator withText(String value) {
+		xmlContent.addText(value);
+		return this;
+	}
+
 	public FileContentXmlGenerator up() {
 		xmlContent.up();
 		return this;
@@ -43,12 +47,12 @@ public final class FileContentXmlGenerator {
 	}
 
 	public FileContentXmlGenerator formatted() {
-		xmlWriter.setFormatted();
+		xmlFormatter.setFormatted();
 		return this;
 	}
 
 	public FileContentXmlGenerator withDeclaration() {
-		xmlWriter.setDeclaration();
+		xmlFormatter.setDeclaration();
 		return this;
 	}
 
@@ -56,9 +60,9 @@ public final class FileContentXmlGenerator {
 		Path path = directory.resolve(fileName);
 		try {
 			Files.createFile(path);
-			StringWriter stringWriter = new StringWriter();
-			xmlWriter.writeTo(stringWriter);
-			Files.write(path, Arrays.asList(stringWriter.toString()), Charset.forName("utf8"));
+			XmlWriter xmlWriter = new XmlWriter(xmlFormatter);
+			xmlWriter.write(xmlContent);
+			Files.write(path, Arrays.asList(xmlWriter.toString()), Charset.forName("utf8"));
 		} catch (IOException e) {
 			throw new FileContentXmlGeneratorException(e);
 		}
@@ -74,6 +78,6 @@ public final class FileContentXmlGenerator {
 			throw new FileContentXmlGeneratorException(e);
 		}
 		this.xmlContent = new XmlContent();
-		this.xmlWriter = new XmlWriter(xmlContent);
+		this.xmlFormatter = new XmlFormatter();
 	}
 }
