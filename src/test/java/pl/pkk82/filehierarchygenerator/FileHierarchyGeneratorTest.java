@@ -13,6 +13,8 @@ import org.assertj.core.api.Condition;
 import org.assertj.core.api.FileAssert;
 import org.junit.Test;
 
+import pl.pkk82.filehierarchyassert.FileHierarchyAssert;
+
 public class FileHierarchyGeneratorTest {
 
 	private FileHierarchy fileHierarchy;
@@ -177,7 +179,7 @@ public class FileHierarchyGeneratorTest {
 		fileHierarchyGenerator.line("line1");
 	}
 
-	private FileHierarchyAssertion thenFileHierarchy() {
+	private FileHierarchyAssert thenFileHierarchy() {
 		return then(fileHierarchy);
 	}
 

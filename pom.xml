@@ -58,6 +58,12 @@
 			<version>1.6.0</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>pl.pkk82.file-hierarchy-assert</groupId>
+			<artifactId>file-hierarchy-assert</artifactId>
+			<version>1.0</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<distributionManagement>
 		<snapshotRepository>
