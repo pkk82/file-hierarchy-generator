@@ -25,7 +25,7 @@ public class FileHierarchyGeneratorTest {
 	public void shouldCreateRootDirectory() {
 		givenFileHierarchyGenerator("workspace");
 		whenGenerateFileHierarchy();
-		thenFileHierarchy().hasRootDirectoryWithName("workspace");
+		thenFileHierarchy().hasRootDirWithName("workspace");
 	}
 
 	@Test
@@ -52,7 +52,7 @@ public class FileHierarchyGeneratorTest {
 		givenFileHierarchyGenerator("workspace")
 				.directory("book");
 		whenGenerateFileHierarchy();
-		thenFileHierarchy().hasCountOfSubdirectories(1).containsDirectoriesInPath("book");
+		thenFileHierarchy().hasCountOfSubdirs(1).containsSubdir("book");
 	}
 
 	@Test
@@ -62,7 +62,7 @@ public class FileHierarchyGeneratorTest {
 				.directory("book")
 				.directory("spring-in-action-2011");
 		whenGenerateFileHierarchy();
-		thenFileHierarchy().hasCountOfSubdirectories(2).containsDirectoriesInPath("book", "spring-in-action-2011");
+		thenFileHierarchy().hasCountOfSubdirs(2).containsSubdir("spring-in-action-2011", "book");
 	}
 
 	@Test
@@ -72,9 +72,9 @@ public class FileHierarchyGeneratorTest {
 				.up()
 				.directory("prv");
 		whenGenerateFileHierarchy();
-		thenFileHierarchy().hasCountOfSubdirectories(2)
-				.containsDirectoriesInPath("book")
-				.containsDirectoriesInPath("prv");
+		thenFileHierarchy().hasCountOfSubdirs(2)
+				.containsSubdir("book")
+				.containsSubdir("prv");
 	}
 
 	@Test
@@ -93,7 +93,7 @@ public class FileHierarchyGeneratorTest {
 	public void shoudCreateEmptyFileInDirectory() {
 		givenFileHierarchyGenerator("workspace").file("conf.iml").generate();
 		whenGenerateFileHierarchy();
-		thenFileHierarchy().hasCountOfSubdirectories(0).hasCountOfFiles(1).containsFileInPath("conf.iml");
+		thenFileHierarchy().hasCountOfSubdirs(0).hasCountOfFiles(1).containsFile("conf.iml");
 	}
 
 	@Test
@@ -107,11 +107,11 @@ public class FileHierarchyGeneratorTest {
 				.file("fileInWorkspace");
 		whenGenerateFileHierarchy();
 		thenFileHierarchy()
-				.hasCountOfSubdirectories(2)
+				.hasCountOfSubdirs(2)
 				.hasCountOfFiles(3)
-				.containsFileInPath("fileInWorkspace")
-				.containsFileInPath("fileInSubdir1", "subdir1")
-				.containsFileInPath("fileInSubdir11", "subdir1", "subdir11");
+				.containsFile("fileInWorkspace")
+				.containsFile("fileInSubdir1", "subdir1")
+				.containsFile("fileInSubdir11", "subdir1", "subdir11");
 	}
 
 	@Test
@@ -120,10 +120,10 @@ public class FileHierarchyGeneratorTest {
 				.file("file1InWorkspace")
 				.file("file2InWorkspace");
 		whenGenerateFileHierarchy();
-		thenFileHierarchy().hasCountOfSubdirectories(0)
+		thenFileHierarchy().hasCountOfSubdirs(0)
 				.hasCountOfFiles(2)
-				.containsFileInPath("file1InWorkspace")
-				.containsFileInPath("file2InWorkspace");
+				.containsFile("file1InWorkspace")
+				.containsFile("file2InWorkspace");
 	}
 
 	@Test
@@ -132,9 +132,9 @@ public class FileHierarchyGeneratorTest {
 				.file("file1InWorkspace")
 				.line("contentOfFile1InWorkspace");
 		whenGenerateFileHierarchy();
-		thenFileHierarchy().hasCountOfSubdirectories(0)
+		thenFileHierarchy().hasCountOfSubdirs(0)
 				.hasCountOfFiles(1)
-				.containsFileInPathWithContent("file1InWorkspace", ImmutableList.of("contentOfFile1InWorkspace"));
+				.containsFileWithContent("file1InWorkspace", ImmutableList.of("contentOfFile1InWorkspace"));
 	}
 
 	@Test
@@ -144,9 +144,9 @@ public class FileHierarchyGeneratorTest {
 				.line("line1")
 				.line("line2");
 		whenGenerateFileHierarchy();
-		thenFileHierarchy().hasCountOfSubdirectories(0)
+		thenFileHierarchy().hasCountOfSubdirs(0)
 				.hasCountOfFiles(1)
-				.containsFileInPathWithContent("file1InWorkspace", ImmutableList.of("line1", "line2"));
+				.containsFileWithContent("file1InWorkspace", ImmutableList.of("line1", "line2"));
 	}
 
 	@Test
