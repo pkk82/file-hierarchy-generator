@@ -16,7 +16,7 @@ public class FileHierarchyGenerator {
 
 	private Path currentDirectory;
 	private Path currentFile;
-	private final TempWorkingDirectoryCreator tempWorkingDirectoryCreatorM;
+	private final TempWorkingDirectoryCreator tempWorkingDirectoryCreator;
 	private final List<Path> directoriesToCreate;
 	private final List<Path> filesToCreate;
 	private final Map<Path, List<String>> fileLines;
@@ -28,7 +28,7 @@ public class FileHierarchyGenerator {
 
 	public FileHierarchy generate() {
 		try {
-			Path tempWorkingDirectory = tempWorkingDirectoryCreatorM.createTempWorkingDirectory();
+			Path tempWorkingDirectory = tempWorkingDirectoryCreator.createTempWorkingDirectory();
 			Path rootDirectory = createDirectories(tempWorkingDirectory);
 			createFiles(tempWorkingDirectory);
 			return new FileHierarchy(rootDirectory);
@@ -79,7 +79,7 @@ public class FileHierarchyGenerator {
 		level = 0;
 		currentDirectory = Paths.get(rootDirectoryName);
 		directoriesToCreate.add(currentDirectory);
-		tempWorkingDirectoryCreatorM = new TempWorkingDirectoryCreator();
+		tempWorkingDirectoryCreator = new TempWorkingDirectoryCreator();
 	}
 
 	private Path createDirectories(Path tempWorkingDirectory) throws IOException {
