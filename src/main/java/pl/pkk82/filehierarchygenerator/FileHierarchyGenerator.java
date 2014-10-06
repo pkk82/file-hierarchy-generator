@@ -125,15 +125,23 @@ public class FileHierarchyGenerator {
 	private void createRootDirectory() throws IOException {
 		Path rootDirectory = workingDirectory.resolve(this.rootDirectory);
 		if (options.contains(FileHierarchyGenerateOption.EXCEPTION_WHEN_ROOT_ALREADY_EXISTS)
-				&& rootDirectory.toFile().exists()
-				&& rootDirectory.toFile().isDirectory()) {
+				&& directoryAlreadyExists(rootDirectory)) {
 			throw new FileHierarchyGeneratorException(String.format("Directory <%s> already exists", rootDirectory));
 		}
 		this.rootDirectory = Files.createDirectories(rootDirectory);
 	}
 
+	private boolean directoryAlreadyExists(Path path) {
+		File rootDirAsFile = path.toFile();
+		return rootDirAsFile.exists() && rootDirAsFile.isDirectory();
+	}
+
 
 	private Path createDirectory(Path fullPath) throws IOException {
+		if (options.contains(FileHierarchyGenerateOption.EXCEPTION_WHEN_SUBDIR_ALREADY_EXISTS)
+				&& directoryAlreadyExists(fullPath)) {
+			throw new FileHierarchyGeneratorException(String.format("Directory <%s> already exists", fullPath));
+		}
 		return Files.createDirectories(fullPath);
 	}
 

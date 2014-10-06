@@ -27,7 +27,7 @@ public class FileHierarchyGeneratorOnExistingHierarchyTest {
 	}
 
 	@Test
-	public void shouldFailWhenRootDirectoryExists() {
+	public void shouldFailWhenRootDirectoryAlreadyExists() {
 		givenExistingFileHierarchy("workspace");
 		givenNewFileHierarchy("workspace", FileHierarchyGenerateOption.EXCEPTION_WHEN_ROOT_ALREADY_EXISTS);
 		whenGenerateNewFileHierarchy();
@@ -51,6 +51,16 @@ public class FileHierarchyGeneratorOnExistingHierarchyTest {
 		whenGenerateNewFileHierarchy();
 		thenNewFileHierarchyOverrideExisting();
 		thenNewFileHierarchy().hasRootDirWithName("workspace").hasCountOfSubdirs(2);
+	}
+
+	@Test
+	public void shouldFailWhenSubdirAlreadyExists() {
+		givenExistingFileHierarchy("workspace").directory("subdir");
+		givenNewFileHierarchy("workspace", FileHierarchyGenerateOption.EXCEPTION_WHEN_SUBDIR_ALREADY_EXISTS)
+				.directory("subdir");
+		whenGenerateNewFileHierarchy();
+		thenExceptionIsThrown().hasMessage(String.format("Directory <%s> already exists",
+				existingFileHierarchy.getRootDirectoryAsPath().resolve("subdir")));
 	}
 
 	private FileHierarchyGenerator givenExistingFileHierarchy(String rootDirectory) {
