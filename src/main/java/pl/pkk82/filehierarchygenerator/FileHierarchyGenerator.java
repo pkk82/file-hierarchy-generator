@@ -1,5 +1,6 @@
 package pl.pkk82.filehierarchygenerator;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -10,32 +11,62 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+
 import pl.pkk82.filehierarchygenerator.util.TempWorkingDirectoryCreator;
 
 public class FileHierarchyGenerator {
 
+	private Path workingDirectory;
+	private Path rootDirectory;
 	private Path currentDirectory;
 	private Path currentFile;
-	private final TempWorkingDirectoryCreator tempWorkingDirectoryCreator;
 	private final List<Path> directoriesToCreate;
 	private final List<Path> filesToCreate;
 	private final Map<Path, List<String>> fileLines;
 	private int level;
+	private final List<FileHierarchyGenerateOption> options;
 
-	public static FileHierarchyGenerator createRootDirectory(String rootDirectoryName) {
-		return new FileHierarchyGenerator(rootDirectoryName);
+
+	public static FileHierarchyGenerator createRootDirectory(String rootDirectoryName,
+			FileHierarchyGenerateOption... options) {
+		return createRootDirectory((Path) null, rootDirectoryName, options);
+	}
+
+	public static FileHierarchyGenerator createRootDirectory(File workingDirectory, String rootDirectoryName,
+			FileHierarchyGenerateOption... options) {
+		return createRootDirectory(workingDirectory == null ? null : workingDirectory.toPath(), rootDirectoryName,
+				options);
+	}
+
+	public static FileHierarchyGenerator createRootDirectory(FileHierarchy workingDirectory, String rootDirectoryName,
+			FileHierarchyGenerateOption... options) {
+		return createRootDirectory(workingDirectory == null ? null :
+				workingDirectory.getRootDirectoryAsPath().getParent(), rootDirectoryName, options);
+	}
+
+	public static FileHierarchyGenerator createRootDirectory(Path workingDirectory, String rootDirectoryName,
+			FileHierarchyGenerateOption... options) {
+		return new FileHierarchyGenerator(workingDirectory, rootDirectoryName, options);
 	}
 
 	public FileHierarchy generate() {
 		try {
-			Path tempWorkingDirectory = tempWorkingDirectoryCreator.createTempWorkingDirectory();
-			Path rootDirectory = createDirectories(tempWorkingDirectory);
-			createFiles(tempWorkingDirectory);
+			createWorkingDirectory();
+			createRootDirectory();
+			createDirectories();
+			createFiles();
 			return new FileHierarchy(rootDirectory);
 		} catch (IOException e) {
 			throw new FileHierarchyGeneratorException(e);
 		}
 
+	}
+
+	private void createWorkingDirectory() throws IOException {
+		if (workingDirectory == null) {
+			workingDirectory = new TempWorkingDirectoryCreator().createTempWorkingDirectory();
+		}
 	}
 
 	public FileHierarchyGenerator directory(String directoryName) {
@@ -72,31 +103,43 @@ public class FileHierarchyGenerator {
 		return this;
 	}
 
-	private FileHierarchyGenerator(String rootDirectoryName) {
+	private FileHierarchyGenerator(Path workingDirectory, String rootDirectoryName,
+			FileHierarchyGenerateOption... options) {
 		directoriesToCreate = new ArrayList<>();
 		filesToCreate = new ArrayList<>();
 		fileLines = new HashMap<>();
 		level = 0;
-		currentDirectory = Paths.get(rootDirectoryName);
-		directoriesToCreate.add(currentDirectory);
-		tempWorkingDirectoryCreator = new TempWorkingDirectoryCreator();
+		rootDirectory = Paths.get(rootDirectoryName);
+		currentDirectory = rootDirectory;
+		this.workingDirectory = workingDirectory;
+		this.options = Lists.newArrayList(options);
 	}
 
-	private Path createDirectories(Path tempWorkingDirectory) throws IOException {
-		Path rootDirectory = null;
+	private void createDirectories() throws IOException {
 		for (Path directoryToCreate : directoriesToCreate) {
-			Path fullPathToResolve = tempWorkingDirectory.resolve(directoryToCreate);
-			Path createdDirectory = Files.createDirectories(fullPathToResolve);
-			if (rootDirectory == null) {
-				rootDirectory = createdDirectory;
-			}
+			Path fullPathToResolve = workingDirectory.resolve(directoryToCreate);
+			createDirectory(fullPathToResolve);
 		}
-		return rootDirectory;
 	}
 
-	private void createFiles(Path tempWorkingDirectory) throws IOException {
+	private void createRootDirectory() throws IOException {
+		Path rootDirectory = workingDirectory.resolve(this.rootDirectory);
+		if (options.contains(FileHierarchyGenerateOption.EXCEPTION_WHEN_ROOT_ALREADY_EXISTS)
+				&& rootDirectory.toFile().exists()
+				&& rootDirectory.toFile().isDirectory()) {
+			throw new FileHierarchyGeneratorException(String.format("Directory <%s> already exists", rootDirectory));
+		}
+		this.rootDirectory = Files.createDirectories(rootDirectory);
+	}
+
+
+	private Path createDirectory(Path fullPath) throws IOException {
+		return Files.createDirectories(fullPath);
+	}
+
+	private void createFiles() throws IOException {
 		for (Path fileToCreate : filesToCreate) {
-			Path fullPathToResolve = tempWorkingDirectory.resolve(fileToCreate);
+			Path fullPathToResolve = workingDirectory.resolve(fileToCreate);
 			Files.createFile(fullPathToResolve);
 			if (fileLines.containsKey(fileToCreate)) {
 				List<String> lines = fileLines.get(fileToCreate);

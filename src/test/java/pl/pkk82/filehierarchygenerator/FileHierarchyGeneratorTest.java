@@ -91,7 +91,7 @@ public class FileHierarchyGeneratorTest {
 
 	@Test
 	public void shoudCreateEmptyFileInDirectory() {
-		givenFileHierarchyGenerator("workspace").file("conf.iml").generate();
+		givenFileHierarchyGenerator("workspace").file("conf.iml");
 		whenGenerateFileHierarchy();
 		thenFileHierarchy().hasCountOfSubdirs(0).hasCountOfFiles(1).containsFile("conf.iml");
 	}
