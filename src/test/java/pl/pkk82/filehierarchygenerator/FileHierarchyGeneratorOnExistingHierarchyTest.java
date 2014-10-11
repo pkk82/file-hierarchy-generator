@@ -4,6 +4,8 @@ package pl.pkk82.filehierarchygenerator;
 import static pl.pkk82.filehierarchygenerator.FileHierarchyAssertions.then;
 import static pl.pkk82.filehierarchygenerator.FileHierarchyGenerator.createRootDirectory;
 
+import java.util.Arrays;
+
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.Test;
 
@@ -61,6 +63,27 @@ public class FileHierarchyGeneratorOnExistingHierarchyTest {
 		whenGenerateNewFileHierarchy();
 		thenExceptionIsThrown().hasMessage(String.format("Directory <%s> already exists",
 				existingFileHierarchy.getRootDirectoryAsPath().resolve("subdir")));
+	}
+
+
+	@Test
+	public void shouldRetainExistingFile() {
+		givenExistingFileHierarchy("workspace").file("file").line("line1");
+		givenNewFileHierarchy("workspace").file("file").line("line2");
+		whenGenerateNewFileHierarchy();
+		thenNewFileHierarchyOverrideExisting();
+		thenNewFileHierarchy().hasRootDirWithName("workspace")
+				.containsFileWithContent("file", Arrays.asList("line1", "line2"));
+	}
+
+	@Test
+	public void shouldFailWhenFileAlreadyExists() {
+		givenExistingFileHierarchy("workspace").file("file").line("line1");
+		givenNewFileHierarchy("workspace", FileHierarchyGenerateOption.EXCEPTION_WHEN_FILE_ALREADY_EXISTS)
+				.file("file").line("line2");
+		whenGenerateNewFileHierarchy();
+		thenExceptionIsThrown().hasMessage(String.format("File <%s> already exists",
+				existingFileHierarchy.getRootDirectoryAsPath().resolve("file")));
 	}
 
 	private FileHierarchyGenerator givenExistingFileHierarchy(String rootDirectory) {

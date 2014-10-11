@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -131,29 +132,44 @@ public class FileHierarchyGenerator {
 		this.rootDirectory = Files.createDirectories(rootDirectory);
 	}
 
-	private boolean directoryAlreadyExists(Path path) {
-		File rootDirAsFile = path.toFile();
-		return rootDirAsFile.exists() && rootDirAsFile.isDirectory();
-	}
-
-
-	private Path createDirectory(Path fullPath) throws IOException {
+	private Path createDirectory(Path path) throws IOException {
 		if (options.contains(FileHierarchyGenerateOption.EXCEPTION_WHEN_SUBDIR_ALREADY_EXISTS)
-				&& directoryAlreadyExists(fullPath)) {
-			throw new FileHierarchyGeneratorException(String.format("Directory <%s> already exists", fullPath));
+				&& directoryAlreadyExists(path)) {
+			throw new FileHierarchyGeneratorException(String.format("Directory <%s> already exists", path));
 		}
-		return Files.createDirectories(fullPath);
+		return Files.createDirectories(path);
 	}
+
 
 	private void createFiles() throws IOException {
 		for (Path fileToCreate : filesToCreate) {
 			Path fullPathToResolve = workingDirectory.resolve(fileToCreate);
-			Files.createFile(fullPathToResolve);
+			createFile(fullPathToResolve);
 			if (fileLines.containsKey(fileToCreate)) {
 				List<String> lines = fileLines.get(fileToCreate);
-				Files.write(fullPathToResolve, lines, Charset.forName("utf8"));
+				Files.write(fullPathToResolve, lines, Charset.forName("utf8"), StandardOpenOption.APPEND);
 			}
 		}
+	}
+
+	private void createFile(Path file) throws IOException {
+		if (options.contains(FileHierarchyGenerateOption.EXCEPTION_WHEN_FILE_ALREADY_EXISTS)
+				&& fileAlreadyExists(file)) {
+			throw new FileHierarchyGeneratorException(String.format("File <%s> already exists", file));
+		}
+		if (!fileAlreadyExists(file)) {
+			Files.createFile(file);
+		}
+	}
+
+	private boolean directoryAlreadyExists(Path directory) {
+		File directoryAsFile = directory.toFile();
+		return directoryAsFile.exists() && directoryAsFile.isDirectory();
+	}
+
+	private boolean fileAlreadyExists(Path file) {
+		File fileAsFile = file.toFile();
+		return fileAsFile.exists() && fileAsFile.isFile();
 	}
 
 	private void validateLevel() {
