@@ -67,13 +67,39 @@ public class FileHierarchyGeneratorOnExistingHierarchyTest {
 
 
 	@Test
-	public void shouldRetainExistingFile() {
+	public void shouldAppendToExistingFile() {
 		givenExistingFileHierarchy("workspace").file("file").line("line1");
 		givenNewFileHierarchy("workspace").file("file").line("line2");
 		whenGenerateNewFileHierarchy();
 		thenNewFileHierarchyOverrideExisting();
 		thenNewFileHierarchy().hasRootDirWithName("workspace")
 				.containsFileWithContent("file", Arrays.asList("line1", "line2"));
+	}
+
+
+	@Test
+	public void shouldOverrideToExistingFile() {
+		givenExistingFileHierarchy("workspace").file("file").line("oldline");
+		givenNewFileHierarchy("workspace").override().file("file").line("newline");
+		whenGenerateNewFileHierarchy();
+		thenNewFileHierarchyOverrideExisting();
+		thenNewFileHierarchy().hasRootDirWithName("workspace")
+				.containsFileWithContent("file", Arrays.asList("newline"));
+	}
+
+	@Test
+	public void shouldOverrideAndAppendToExistingFile() {
+		givenExistingFileHierarchy("workspace")
+				.file("fileToOverride").line("oldline")
+				.file("fileToAppend").line("line1");
+		givenNewFileHierarchy("workspace")
+				.override().file("fileToOverride").line("newline")
+				.append().file("fileToAppend").line("line2");
+		whenGenerateNewFileHierarchy();
+		thenNewFileHierarchyOverrideExisting();
+		thenNewFileHierarchy().hasRootDirWithName("workspace")
+				.containsFileWithContent("fileToOverride", Arrays.asList("newline"))
+				.containsFileWithContent("fileToAppend", Arrays.asList("line1", "line2"));
 	}
 
 	@Test

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -23,10 +24,11 @@ public class FileHierarchyGenerator {
 	private Path currentDirectory;
 	private Path currentFile;
 	private final List<Path> directoriesToCreate;
-	private final List<Path> filesToCreate;
+	private final List<FileToCreate> filesToCreate;
 	private final Map<Path, List<String>> fileLines;
 	private int level;
 	private final List<FileHierarchyGenerateOption> options;
+	private OpenOption fileWriteOption = StandardOpenOption.APPEND;
 
 
 	public static FileHierarchyGenerator createRootDirectory(String rootDirectoryName,
@@ -88,7 +90,7 @@ public class FileHierarchyGenerator {
 	public FileHierarchyGenerator file(String fileName) {
 		Path filePath = currentDirectory.resolve(fileName);
 		currentFile = filePath;
-		filesToCreate.add(filePath);
+		filesToCreate.add(new FileToCreate(filePath, fileWriteOption));
 		return this;
 	}
 
@@ -101,6 +103,16 @@ public class FileHierarchyGenerator {
 		}
 		List<String> lines = fileLines.get(currentFile);
 		lines.add(line);
+		return this;
+	}
+
+	public FileHierarchyGenerator override() {
+		fileWriteOption = StandardOpenOption.WRITE;
+		return this;
+	}
+
+	public FileHierarchyGenerator append() {
+		fileWriteOption = StandardOpenOption.APPEND;
 		return this;
 	}
 
@@ -132,6 +144,7 @@ public class FileHierarchyGenerator {
 		this.rootDirectory = Files.createDirectories(rootDirectory);
 	}
 
+
 	private Path createDirectory(Path path) throws IOException {
 		if (options.contains(FileHierarchyGenerateOption.EXCEPTION_WHEN_SUBDIR_ALREADY_EXISTS)
 				&& directoryAlreadyExists(path)) {
@@ -140,14 +153,14 @@ public class FileHierarchyGenerator {
 		return Files.createDirectories(path);
 	}
 
-
 	private void createFiles() throws IOException {
-		for (Path fileToCreate : filesToCreate) {
-			Path fullPathToResolve = workingDirectory.resolve(fileToCreate);
+		for (FileToCreate fileToCreate : filesToCreate) {
+			Path fileToCreatePath = fileToCreate.getPath();
+			Path fullPathToResolve = workingDirectory.resolve(fileToCreatePath);
 			createFile(fullPathToResolve);
-			if (fileLines.containsKey(fileToCreate)) {
-				List<String> lines = fileLines.get(fileToCreate);
-				Files.write(fullPathToResolve, lines, Charset.forName("utf8"), StandardOpenOption.APPEND);
+			if (fileLines.containsKey(fileToCreatePath)) {
+				List<String> lines = fileLines.get(fileToCreatePath);
+				Files.write(fullPathToResolve, lines, Charset.forName("utf8"), fileToCreate.getWriteOption());
 			}
 		}
 	}
@@ -172,11 +185,10 @@ public class FileHierarchyGenerator {
 		return fileAsFile.exists() && fileAsFile.isFile();
 	}
 
+
 	private void validateLevel() {
 		if (level - 1 < 0) {
 			throw new IllegalInvocationException("up method should not be invoked in current context (root directory)");
 		}
 	}
-
-
 }
