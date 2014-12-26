@@ -138,6 +138,22 @@ public class FileHierarchyGeneratorTest {
 	}
 
 	@Test
+	public void shouldCreateFilesWithOneInvocation() {
+		givenFileHierarchyGenerator("workspace")
+				.file("subdir1/fileInSubdir1")
+				.file("subdir11/fileInSubdir11")
+				.up().up()
+				.file("fileInWorkspace");
+		whenGenerateFileHierarchy();
+		thenFileHierarchy()
+				.hasCountOfSubdirs(2)
+				.hasCountOfFiles(3)
+				.containsFile("fileInWorkspace")
+				.containsFile("fileInSubdir1", "subdir1")
+				.containsFile("fileInSubdir11", "subdir1", "subdir11");
+	}
+
+	@Test
 	public void shoudCreateEmptyFilesInSameDirectory() {
 		givenFileHierarchyGenerator("workspace")
 				.file("file1InWorkspace")

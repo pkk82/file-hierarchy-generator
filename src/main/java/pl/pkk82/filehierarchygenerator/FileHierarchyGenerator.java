@@ -91,7 +91,12 @@ public class FileHierarchyGenerator {
 	}
 
 	public FileHierarchyGenerator file(String fileName) {
-		Path filePath = currentDirectory.resolve(fileName);
+		Path fileNameAsPath = Paths.get(fileName);
+		Path parent = fileNameAsPath.getParent();
+		if (parent != null) {
+			directory(parent);
+		}
+		Path filePath = currentDirectory.resolve(fileNameAsPath.getFileName());
 		currentFile = filePath;
 		filesToCreate.add(new FileToCreate(filePath, fileWriteOption));
 		return this;
