@@ -56,7 +56,7 @@ public class FileHierarchyGeneratorTest {
 	}
 
 	@Test
-	public void shouldCreateDirectories() {
+	public void shouldCreateDirectoriesWithTwoInvocations() {
 		givenFileHierarchyGenerator("workspace")
 				.directory("book")
 				.directory("spring-in-action-2011");
@@ -65,11 +65,23 @@ public class FileHierarchyGeneratorTest {
 	}
 
 	@Test
-	public void shouldCreateDirectoriesWithSeparator() {
+	public void shouldCreateDirectoriesWithOneInvocation() {
 		givenFileHierarchyGenerator("workspace")
 				.directory("book/spring-in-action-2011")
 				.up().up()
 				.directory("book/spring-in-action-2007");
+		whenGenerateFileHierarchy();
+		thenFileHierarchy().hasCountOfSubdirs(3)
+				.containsSubdir("spring-in-action-2011", "book")
+				.containsSubdir("spring-in-action-2007", "book");
+	}
+
+	@Test
+	public void shouldCreateDirectoriesWithVarArgInvocation() {
+		givenFileHierarchyGenerator("workspace")
+				.directories("book", "spring-in-action-2011")
+				.up().up()
+				.directories("book", "spring-in-action-2007");
 		whenGenerateFileHierarchy();
 		thenFileHierarchy().hasCountOfSubdirs(3)
 				.containsSubdir("spring-in-action-2011", "book")

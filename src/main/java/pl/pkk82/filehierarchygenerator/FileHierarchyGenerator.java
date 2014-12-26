@@ -74,12 +74,14 @@ public class FileHierarchyGenerator {
 
 	public FileHierarchyGenerator directory(String directoryName) {
 		Path directoryPath = Paths.get(directoryName);
-		Path newCurrentDirectory = currentDirectory.resolve(directoryPath);
-		directoriesToCreate.add(newCurrentDirectory);
-		currentDirectory = newCurrentDirectory;
-		level += directoryPath.getNameCount();
-		return this;
+		return directory(directoryPath);
 	}
+
+	public FileHierarchyGenerator directories(String directoryName, String... directoryNames) {
+		Path directoryPath = Paths.get(directoryName, directoryNames);
+		return directory(directoryPath);
+	}
+
 
 	public FileHierarchyGenerator up() {
 		validateLevel();
@@ -147,6 +149,14 @@ public class FileHierarchyGenerator {
 			throw new FileHierarchyGeneratorException(String.format("Directory <%s> already exists", rootDirectory));
 		}
 		this.rootDirectory = Files.createDirectories(rootDirectory);
+	}
+
+	private FileHierarchyGenerator directory(Path directoryPath) {
+		Path newCurrentDirectory = currentDirectory.resolve(directoryPath);
+		directoriesToCreate.add(newCurrentDirectory);
+		currentDirectory = newCurrentDirectory;
+		level += directoryPath.getNameCount();
+		return this;
 	}
 
 	private Path createDirectory(Path path) throws IOException {
