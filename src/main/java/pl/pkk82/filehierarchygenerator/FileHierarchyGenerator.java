@@ -73,10 +73,11 @@ public class FileHierarchyGenerator {
 	}
 
 	public FileHierarchyGenerator directory(String directoryName) {
-		Path newCurrentDirectory = currentDirectory.resolve(directoryName);
+		Path directoryPath = Paths.get(directoryName);
+		Path newCurrentDirectory = currentDirectory.resolve(directoryPath);
 		directoriesToCreate.add(newCurrentDirectory);
 		currentDirectory = newCurrentDirectory;
-		level++;
+		level += directoryPath.getNameCount();
 		return this;
 	}
 
@@ -191,7 +192,8 @@ public class FileHierarchyGenerator {
 
 	private void validateLevel() {
 		if (level - 1 < 0) {
-			throw new IllegalInvocationException("up method should not be invoked in current context (root directory)");
+			throw new IllegalInvocationException("up method should not be invoked in current context (root " +
+					"directory)");
 		}
 	}
 
