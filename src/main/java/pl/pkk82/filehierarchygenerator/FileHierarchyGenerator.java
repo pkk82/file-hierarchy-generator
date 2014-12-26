@@ -3,12 +3,10 @@ package pl.pkk82.filehierarchygenerator;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,11 +22,9 @@ public class FileHierarchyGenerator {
 	private Path workingDirectory;
 	private Path rootDirectory;
 	private Path currentDirectory;
-	private Path currentFile;
+	private FileToCreate currentFile;
 	private final List<Path> directoriesToCreate;
-	private final List<FileToCreate> filesToCreate;
-	private final Map<Path, List<String>> fileLines;
-	private final Map<Path, InputStream> fileStreams;
+	private final Map<Path, FileToCreate> filesToCreate;
 	private int level;
 	private final List<FileHierarchyGenerateOption> options;
 	private OpenOption fileWriteOption = StandardOpenOption.APPEND;
@@ -101,14 +97,16 @@ public class FileHierarchyGenerator {
 			directory(parent);
 		}
 		Path filePath = currentDirectory.resolve(fileNameAsPath.getFileName());
-		currentFile = filePath;
-		filesToCreate.add(new FileToCreate(filePath, fileWriteOption));
+		if (!filesToCreate.containsKey(filePath)) {
+			filesToCreate.put(filePath, new FileToCreate(filePath, fileWriteOption));
+		}
+		currentFile = filesToCreate.get(filePath);
 		return this;
 	}
 
 	public FileHierarchyGenerator file(String fileName, InputStream inputStream) {
 		file(fileName);
-		fileStreams.put(currentFile, inputStream);
+		currentFile.setInputStream(inputStream);
 		return this;
 	}
 
@@ -116,11 +114,7 @@ public class FileHierarchyGenerator {
 		if (currentFile == null) {
 			throw new IllegalInvocationException("line method should not be invoked in current context (directory)");
 		}
-		if (!fileLines.containsKey(currentFile)) {
-			fileLines.put(currentFile, new ArrayList<String>());
-		}
-		List<String> lines = fileLines.get(currentFile);
-		lines.add(line);
+		currentFile.addLine(line);
 		return this;
 	}
 
@@ -141,9 +135,7 @@ public class FileHierarchyGenerator {
 	private FileHierarchyGenerator(Path workingDirectory, String rootDirectoryName,
 			FileHierarchyGenerateOption... options) {
 		directoriesToCreate = new ArrayList<>();
-		filesToCreate = new ArrayList<>();
-		fileLines = new HashMap<>();
-		fileStreams = new HashMap<>();
+		filesToCreate = new HashMap<>();
 		level = 0;
 		rootDirectory = Paths.get(rootDirectoryName);
 		currentDirectory = rootDirectory;
@@ -184,16 +176,11 @@ public class FileHierarchyGenerator {
 	}
 
 	private void createFiles() throws IOException {
-		for (FileToCreate fileToCreate : filesToCreate) {
+		for (FileToCreate fileToCreate : filesToCreate.values()) {
 			Path fileToCreatePath = fileToCreate.getPath();
 			Path fullPathToResolve = workingDirectory.resolve(fileToCreatePath);
 			createFile(fullPathToResolve);
-			if (fileLines.containsKey(fileToCreatePath)) {
-				List<String> lines = fileLines.get(fileToCreatePath);
-				Files.write(fullPathToResolve, lines, Charset.forName("utf8"), fileToCreate.getWriteOption());
-			} else if (fileStreams.containsKey(fileToCreatePath)) {
-				Files.copy(fileStreams.get(fileToCreatePath), fullPathToResolve, StandardCopyOption.REPLACE_EXISTING);
-			}
+			fileToCreate.write(fullPathToResolve);
 		}
 	}
 

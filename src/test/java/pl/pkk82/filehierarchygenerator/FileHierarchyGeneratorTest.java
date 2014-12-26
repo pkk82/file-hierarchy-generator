@@ -200,6 +200,21 @@ public class FileHierarchyGeneratorTest {
 	}
 
 	@Test
+	public void shoudValidateFileCreation() {
+		givenFileHierarchyGenerator("workspace")
+				.file("dir/file", new ByteArrayInputStream("line1".getBytes()))
+				.up()
+				.file("dir/file");
+		try {
+			whenLineInGenerator();
+			fail("exception should have been thrown");
+		} catch (Exception e) {
+			then(e).isExactlyInstanceOf(IllegalStateException.class)
+					.hasMessage("only one input method can be used for workspace\\dir\\file");
+		}
+	}
+
+	@Test
 	public void shouldCreatePropertyFile() {
 		givenFileHierarchyGenerator("workspace")
 				.file("workspace.properties")
@@ -213,11 +228,11 @@ public class FileHierarchyGeneratorTest {
 
 	@Test
 	public void shoudValidateLineInvocation() {
+		givenFileHierarchyGenerator("workspace");
 		try {
-			givenFileHierarchyGenerator("workspace");
 			whenLineInGenerator();
 			fail("exception should have been thrown");
-		} catch (IllegalInvocationException e) {
+		} catch (Exception e) {
 			then(e).isExactlyInstanceOf(IllegalInvocationException.class)
 					.hasMessage("line method should not be invoked in current context (directory)");
 		}
