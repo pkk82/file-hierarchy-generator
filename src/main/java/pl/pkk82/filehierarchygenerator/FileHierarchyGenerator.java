@@ -106,6 +106,10 @@ public class FileHierarchyGenerator {
 		return this;
 	}
 
+	public FileHierarchyGenerator property(String key, String value) {
+		return line(createProperty(key, value));
+	}
+
 	public FileHierarchyGenerator override() {
 		fileWriteOption = StandardOpenOption.WRITE;
 		return this;
@@ -143,7 +147,6 @@ public class FileHierarchyGenerator {
 		}
 		this.rootDirectory = Files.createDirectories(rootDirectory);
 	}
-
 
 	private Path createDirectory(Path path) throws IOException {
 		if (options.contains(FileHierarchyGenerateOption.EXCEPTION_WHEN_SUBDIR_ALREADY_EXISTS)
@@ -190,5 +193,9 @@ public class FileHierarchyGenerator {
 		if (level - 1 < 0) {
 			throw new IllegalInvocationException("up method should not be invoked in current context (root directory)");
 		}
+	}
+
+	private String createProperty(String key, String value) {
+		return String.format("%s=%s", key, value);
 	}
 }

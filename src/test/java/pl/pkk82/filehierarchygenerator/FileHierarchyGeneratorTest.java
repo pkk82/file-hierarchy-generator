@@ -150,6 +150,18 @@ public class FileHierarchyGeneratorTest {
 	}
 
 	@Test
+	public void shouldCreatePropertyFile() {
+		givenFileHierarchyGenerator("workspace")
+				.file("workspace.properties")
+				.property("key1", "value1")
+				.property("key2", "value2");
+		whenGenerateFileHierarchy();
+		thenFileHierarchy().hasCountOfSubdirs(0)
+				.hasCountOfFiles(1)
+				.containsFileWithContent("workspace.properties", ImmutableList.of("key1=value1", "key2=value2"));
+	}
+
+	@Test
 	public void shoudValidateLineInvocation() {
 		try {
 			givenFileHierarchyGenerator("workspace");
