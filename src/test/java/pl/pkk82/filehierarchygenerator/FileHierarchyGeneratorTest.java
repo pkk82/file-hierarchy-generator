@@ -7,11 +7,13 @@ import static pl.pkk82.filehierarchygenerator.FileHierarchyGenerator.createRootD
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
 
 import com.google.common.collect.ImmutableList;
 
 import org.assertj.core.api.Condition;
 import org.assertj.core.api.FileAssert;
+import org.assertj.core.api.ThrowableAssert;
 import org.junit.Test;
 
 import pl.pkk82.filehierarchyassert.FileHierarchyAssert;
@@ -21,6 +23,8 @@ public class FileHierarchyGeneratorTest {
 	private FileHierarchy fileHierarchy;
 
 	private FileHierarchyGenerator fileHierarchyGenerator;
+
+	private Exception exception;
 
 	@Test
 	public void shouldCreateRootDirectory() {
@@ -200,18 +204,24 @@ public class FileHierarchyGeneratorTest {
 	}
 
 	@Test
-	public void shoudValidateFileCreation() {
+	public void shoudValidateFileCreationLineAfterStream() {
 		givenFileHierarchyGenerator("workspace")
 				.file("dir/file", new ByteArrayInputStream("line1".getBytes()))
 				.up()
 				.file("dir/file");
-		try {
-			whenLineInGenerator();
-			fail("exception should have been thrown");
-		} catch (Exception e) {
-			then(e).isExactlyInstanceOf(IllegalStateException.class)
-					.hasMessage("only one input method can be used for workspace\\dir\\file");
-		}
+		whenLineInGenerator("line2");
+		thenException().isExactlyInstanceOf(IllegalStateException.class)
+				.hasMessage("only one input method can be used for workspace\\dir\\file");
+	}
+
+	@Test
+	public void shoudValidateFileCreationStreamAfterLine() {
+		givenFileHierarchyGenerator("workspace")
+				.file("dir/file").line("line1")
+				.up();
+		whenFileInGenerator("dir/file", new ByteArrayInputStream("line2".getBytes()));
+		thenException().isExactlyInstanceOf(IllegalStateException.class)
+				.hasMessage("only one input method can be used for workspace\\dir\\file");
 	}
 
 	@Test
@@ -226,16 +236,14 @@ public class FileHierarchyGeneratorTest {
 				.containsFileWithContent("workspace.properties", ImmutableList.of("key1=value1", "key2=value2"));
 	}
 
+
 	@Test
 	public void shoudValidateLineInvocation() {
 		givenFileHierarchyGenerator("workspace");
-		try {
-			whenLineInGenerator();
-			fail("exception should have been thrown");
-		} catch (Exception e) {
-			then(e).isExactlyInstanceOf(IllegalInvocationException.class)
-					.hasMessage("line method should not be invoked in current context (directory)");
-		}
+		whenLineInGenerator("line1");
+		thenException().isExactlyInstanceOf(IllegalInvocationException.class)
+				.hasMessage("line method should not be invoked in current context (directory)");
+
 	}
 
 	private FileHierarchyGenerator givenFileHierarchyGenerator(String workspace) {
@@ -252,8 +260,20 @@ public class FileHierarchyGeneratorTest {
 		fileHierarchyGenerator.up();
 	}
 
-	private void whenLineInGenerator() {
-		fileHierarchyGenerator.line("line1");
+	private void whenLineInGenerator(String line) {
+		try {
+			fileHierarchyGenerator.line(line);
+		} catch (Exception e) {
+			this.exception = e;
+		}
+	}
+
+	private void whenFileInGenerator(String fileName, InputStream inputStream) {
+		try {
+			fileHierarchyGenerator.file(fileName, inputStream);
+		} catch (Exception e) {
+			this.exception = e;
+		}
 	}
 
 	private FileHierarchyAssert thenFileHierarchy() {
@@ -262,6 +282,10 @@ public class FileHierarchyGeneratorTest {
 
 	private FileAssert thenTempWorkingDirectory() {
 		return then(fileHierarchy.getTempWorkingDirectoryAsFile());
+	}
+
+	private ThrowableAssert thenException() {
+		return then(exception).isNotNull();
 	}
 
 
