@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.fail;
 import static pl.pkk82.filehierarchygenerator.FileHierarchyAssertions.then;
 import static pl.pkk82.filehierarchygenerator.FileHierarchyGenerator.createRootDirectory;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 
 import com.google.common.collect.ImmutableList;
@@ -186,6 +187,16 @@ public class FileHierarchyGeneratorTest {
 		thenFileHierarchy().hasCountOfSubdirs(0)
 				.hasCountOfFiles(1)
 				.containsFileWithContent("file1InWorkspace", ImmutableList.of("line1", "line2"));
+	}
+
+	@Test
+	public void shoudCreateFileWithStream() {
+		givenFileHierarchyGenerator("workspace")
+				.file("dir/file", new ByteArrayInputStream("line1".getBytes()));
+		whenGenerateFileHierarchy();
+		thenFileHierarchy().hasCountOfSubdirs(1)
+				.hasCountOfFiles(1)
+				.containsFileWithContent("file", ImmutableList.of("line1"), "dir");
 	}
 
 	@Test

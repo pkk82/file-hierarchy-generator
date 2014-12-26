@@ -2,11 +2,13 @@ package pl.pkk82.filehierarchygenerator;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +28,7 @@ public class FileHierarchyGenerator {
 	private final List<Path> directoriesToCreate;
 	private final List<FileToCreate> filesToCreate;
 	private final Map<Path, List<String>> fileLines;
+	private final Map<Path, InputStream> fileStreams;
 	private int level;
 	private final List<FileHierarchyGenerateOption> options;
 	private OpenOption fileWriteOption = StandardOpenOption.APPEND;
@@ -90,6 +93,7 @@ public class FileHierarchyGenerator {
 		return this;
 	}
 
+
 	public FileHierarchyGenerator file(String fileName) {
 		Path fileNameAsPath = Paths.get(fileName);
 		Path parent = fileNameAsPath.getParent();
@@ -99,6 +103,12 @@ public class FileHierarchyGenerator {
 		Path filePath = currentDirectory.resolve(fileNameAsPath.getFileName());
 		currentFile = filePath;
 		filesToCreate.add(new FileToCreate(filePath, fileWriteOption));
+		return this;
+	}
+
+	public FileHierarchyGenerator file(String fileName, InputStream inputStream) {
+		file(fileName);
+		fileStreams.put(currentFile, inputStream);
 		return this;
 	}
 
@@ -133,6 +143,7 @@ public class FileHierarchyGenerator {
 		directoriesToCreate = new ArrayList<>();
 		filesToCreate = new ArrayList<>();
 		fileLines = new HashMap<>();
+		fileStreams = new HashMap<>();
 		level = 0;
 		rootDirectory = Paths.get(rootDirectoryName);
 		currentDirectory = rootDirectory;
@@ -180,6 +191,8 @@ public class FileHierarchyGenerator {
 			if (fileLines.containsKey(fileToCreatePath)) {
 				List<String> lines = fileLines.get(fileToCreatePath);
 				Files.write(fullPathToResolve, lines, Charset.forName("utf8"), fileToCreate.getWriteOption());
+			} else if (fileStreams.containsKey(fileToCreatePath)) {
+				Files.copy(fileStreams.get(fileToCreatePath), fullPathToResolve, StandardCopyOption.REPLACE_EXISTING);
 			}
 		}
 	}
