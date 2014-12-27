@@ -25,6 +25,7 @@ public class FileHierarchyGenerator {
 	private FileToCreate currentFile;
 	private final List<Path> directoriesToCreate;
 	private final Map<Path, FileToCreate> filesToCreate;
+	private int previousLevel;
 	private int level;
 	private final List<FileHierarchyGenerateOption> options;
 	private OpenOption fileWriteOption = StandardOpenOption.APPEND;
@@ -76,19 +77,33 @@ public class FileHierarchyGenerator {
 		return directory(directoryPath);
 	}
 
+	public FileHierarchyGenerator directoryAndUp(String directoryName) {
+		Path directoryPath = Paths.get(directoryName);
+		directory(directoryPath);
+		up(level - previousLevel);
+		return this;
+	}
+
 	public FileHierarchyGenerator directories(String directoryName, String... directoryNames) {
 		Path directoryPath = Paths.get(directoryName, directoryNames);
 		return directory(directoryPath);
 	}
 
+	public FileHierarchyGenerator directoriesAndUp(String directoryName, String... directoryNames) {
+		Path directoryPath = Paths.get(directoryName, directoryNames);
+		directory(directoryPath);
+		up(level - previousLevel);
+		return this;
+	}
+
 
 	public FileHierarchyGenerator up() {
 		validateLevel();
+		previousLevel = level;
 		level--;
 		currentDirectory = currentDirectory.getParent();
 		return this;
 	}
-
 
 	public FileHierarchyGenerator file(String fileName) {
 		Path fileNameAsPath = Paths.get(fileName);
@@ -104,9 +119,17 @@ public class FileHierarchyGenerator {
 		return this;
 	}
 
+
 	public FileHierarchyGenerator file(String fileName, InputStream inputStream) {
 		file(fileName);
 		currentFile.setInputStream(inputStream);
+		return this;
+	}
+
+	public FileHierarchyGenerator fileAndUp(String fileName, InputStream inputStream) {
+		file(fileName);
+		currentFile.setInputStream(inputStream);
+		up(level - previousLevel);
 		return this;
 	}
 
@@ -136,6 +159,7 @@ public class FileHierarchyGenerator {
 			FileHierarchyGenerateOption... options) {
 		directoriesToCreate = new ArrayList<>();
 		filesToCreate = new HashMap<>();
+		previousLevel = 0;
 		level = 0;
 		rootDirectory = Paths.get(rootDirectoryName);
 		currentDirectory = rootDirectory;
@@ -163,6 +187,7 @@ public class FileHierarchyGenerator {
 		Path newCurrentDirectory = currentDirectory.resolve(directoryPath);
 		directoriesToCreate.add(newCurrentDirectory);
 		currentDirectory = newCurrentDirectory;
+		previousLevel = level;
 		level += directoryPath.getNameCount();
 		return this;
 	}
@@ -202,6 +227,12 @@ public class FileHierarchyGenerator {
 	private boolean fileAlreadyExists(Path file) {
 		File fileAsFile = file.toFile();
 		return fileAsFile.exists() && fileAsFile.isFile();
+	}
+
+	private void up(int nTimes) {
+		for (int i = 0; i < nTimes; i++) {
+			up();
+		}
 	}
 
 

@@ -82,10 +82,32 @@ public class FileHierarchyGeneratorTest {
 	}
 
 	@Test
+	public void shouldCreateDirectoriesAndUpWithOneInvocation() {
+		givenFileHierarchyGenerator("workspace")
+				.directoryAndUp("book/spring-in-action-2011")
+				.directory("book/spring-in-action-2007");
+		whenGenerateFileHierarchy();
+		thenFileHierarchy().hasCountOfSubdirs(3)
+				.containsSubdir("spring-in-action-2011", "book")
+				.containsSubdir("spring-in-action-2007", "book");
+	}
+
+	@Test
 	public void shouldCreateDirectoriesWithVarArgInvocation() {
 		givenFileHierarchyGenerator("workspace")
 				.directories("book", "spring-in-action-2011")
 				.up().up()
+				.directories("book", "spring-in-action-2007");
+		whenGenerateFileHierarchy();
+		thenFileHierarchy().hasCountOfSubdirs(3)
+				.containsSubdir("spring-in-action-2011", "book")
+				.containsSubdir("spring-in-action-2007", "book");
+	}
+
+	@Test
+	public void shouldCreateDirectoriesAndUpWithVarArgInvocation() {
+		givenFileHierarchyGenerator("workspace")
+				.directoriesAndUp("book", "spring-in-action-2011")
 				.directories("book", "spring-in-action-2007");
 		whenGenerateFileHierarchy();
 		thenFileHierarchy().hasCountOfSubdirs(3)
@@ -201,6 +223,18 @@ public class FileHierarchyGeneratorTest {
 		thenFileHierarchy().hasCountOfSubdirs(1)
 				.hasCountOfFiles(1)
 				.containsFileWithContent("file", ImmutableList.of("line1"), "dir");
+	}
+
+	@Test
+	public void shoudCreateFileUpWithStream() {
+		givenFileHierarchyGenerator("workspace")
+				.fileAndUp("dir1/file", new ByteArrayInputStream("dir1-file".getBytes()))
+				.fileAndUp("dir2/file", new ByteArrayInputStream("dir2-file".getBytes()));
+		whenGenerateFileHierarchy();
+		thenFileHierarchy().hasCountOfSubdirs(2)
+				.hasCountOfFiles(2)
+				.containsFileWithContent("file", ImmutableList.of("dir1-file"), "dir1")
+				.containsFileWithContent("file", ImmutableList.of("dir2-file"), "dir2");
 	}
 
 	@Test
