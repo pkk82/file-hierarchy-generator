@@ -2,6 +2,16 @@
 
 A small library to create directory hierarchy with files in tests.
 
+## Maven use
+
+```xml
+<dependency>
+	<groupId>pl.pkk82.file-hierarchy-generator</groupId>
+	<artifactId>file-hierarchy-generator</artifactId>
+	<version>1.4</version>
+</dependency>
+```
+
 ## Create files in directories
 
 ```java
