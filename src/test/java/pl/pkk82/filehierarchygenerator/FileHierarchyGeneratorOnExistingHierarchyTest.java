@@ -4,11 +4,12 @@ package pl.pkk82.filehierarchygenerator;
 import static pl.pkk82.filehierarchygenerator.FileHierarchyAssertions.then;
 import static pl.pkk82.filehierarchygenerator.FileHierarchyGenerator.createRootDirectory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.Test;
-
 import pl.pkk82.filehierarchyassert.FileHierarchyAssert;
 
 public class FileHierarchyGeneratorOnExistingHierarchyTest {
@@ -78,13 +79,23 @@ public class FileHierarchyGeneratorOnExistingHierarchyTest {
 
 
 	@Test
-	public void shouldOverrideToExistingFile() {
-		givenExistingFileHierarchy("workspace").file("file").line("oldline");
-		givenNewFileHierarchy("workspace").override().file("file").line("newline");
+	public void shouldOverrideExistingFile() {
+		givenExistingFileHierarchy("workspace").file("file").line("oldLine1").line("oldLine2");
+		givenNewFileHierarchy("workspace").override().file("file").line("newline1");
 		whenGenerateNewFileHierarchy();
 		thenNewFileHierarchyOverrideExisting();
 		thenNewFileHierarchy().hasRootDirWithName("workspace")
-				.containsFileWithContent("file", Arrays.asList("newline"));
+				.containsFileWithContent("file", Collections.singletonList("newline1"));
+	}
+
+	@Test
+	public void shouldOverrideExistingFileWithEmptyValue() {
+		givenExistingFileHierarchy("workspace").file("file").line("oldLine1").line("oldLine2");
+		givenNewFileHierarchy("workspace").override().file("file");
+		whenGenerateNewFileHierarchy();
+		thenNewFileHierarchyOverrideExisting();
+		thenNewFileHierarchy().hasRootDirWithName("workspace")
+				.containsFileWithContent("file", new ArrayList<String>());
 	}
 
 	@Test
@@ -98,7 +109,7 @@ public class FileHierarchyGeneratorOnExistingHierarchyTest {
 		whenGenerateNewFileHierarchy();
 		thenNewFileHierarchyOverrideExisting();
 		thenNewFileHierarchy().hasRootDirWithName("workspace")
-				.containsFileWithContent("fileToOverride", Arrays.asList("newline"))
+				.containsFileWithContent("fileToOverride", Collections.singletonList("newline"))
 				.containsFileWithContent("fileToAppend", Arrays.asList("line1", "line2"));
 	}
 
@@ -119,12 +130,11 @@ public class FileHierarchyGeneratorOnExistingHierarchyTest {
 
 
 	private FileHierarchyGenerator givenNewFileHierarchy(String workspace,
-			FileHierarchyGenerateOption... fileHierarchyGenerateOptions) {
+														 FileHierarchyGenerateOption... fileHierarchyGenerateOptions) {
 		existingFileHierarchy = existingFileHierarchyGenerator.generate();
 		newFileHierarchyGenerator = createRootDirectory(existingFileHierarchy, workspace, fileHierarchyGenerateOptions);
 		return newFileHierarchyGenerator;
 	}
-
 
 
 	private FileHierarchy whenGenerateNewFileHierarchy() {

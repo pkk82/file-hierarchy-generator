@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Lists;
-
 import pl.pkk82.filehierarchygenerator.util.TempWorkingDirectoryCreator;
 
 public class FileHierarchyGenerator {
@@ -146,7 +145,7 @@ public class FileHierarchyGenerator {
 	}
 
 	public FileHierarchyGenerator override() {
-		fileWriteOption = StandardOpenOption.WRITE;
+		fileWriteOption = StandardOpenOption.TRUNCATE_EXISTING;
 		return this;
 	}
 

@@ -47,10 +47,10 @@ class FileToCreate {
 	}
 
 	public void write(Path fullPathToResolve) throws IOException {
-		if (!lines.isEmpty()) {
-			Files.write(fullPathToResolve, lines, Charset.forName("utf8"), getWriteOption());
-		} else if (inputStream != null) {
+		if (inputStream != null) {
 			Files.copy(inputStream, fullPathToResolve, StandardCopyOption.REPLACE_EXISTING);
+		} else {
+			Files.write(fullPathToResolve, lines, Charset.forName("utf8"), getWriteOption());
 		}
 	}
 }
