@@ -8,7 +8,7 @@ A small library to create directory hierarchy with files in tests.
 <dependency>
 	<groupId>pl.pkk82.file-hierarchy-generator</groupId>
 	<artifactId>file-hierarchy-generator</artifactId>
-	<version>1.4.6</version>
+	<version>1.4.7</version>
 </dependency>
 ```
 
