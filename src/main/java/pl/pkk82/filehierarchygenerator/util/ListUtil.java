@@ -5,6 +5,7 @@ import java.util.ListIterator;
 
 public class ListUtil {
 
+	@SafeVarargs
 	public static <E> void insertBetween(List<E> list, E... elements) {
 		if (list != null && list.size() > 1) {
 			ListIterator<E> iIterator = list.listIterator();
@@ -19,6 +20,7 @@ public class ListUtil {
 		}
 	}
 
+	@SafeVarargs
 	public static <E> void insertBefore(List<E> list, E... elements) {
 		if (list != null) {
 			ListIterator<E> iIterator = list.listIterator();
@@ -28,6 +30,7 @@ public class ListUtil {
 		}
 	}
 
+	@SafeVarargs
 	public static <E> void insertAfter(List<E> list, E... elements) {
 		if (list != null) {
 			ListIterator<E> iIterator = list.listIterator(list.size());
