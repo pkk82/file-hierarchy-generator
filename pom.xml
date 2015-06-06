@@ -113,7 +113,7 @@
 					<releaseProfiles>release</releaseProfiles>
 					<goals>deploy</goals>
 					<arguments>-Dgpg.passphrase=${gpg.sonatype.passphrase}</arguments>
-					<preparationGoals>replacer:replace</preparationGoals>
+					<preparationGoals>replacer:replace scm:add</preparationGoals>
 				</configuration>
 			</plugin>
 			<plugin>
