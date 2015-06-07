@@ -4,15 +4,13 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.Collections;
 
 import org.apache.commons.lang3.StringUtils;
-
 import pl.pkk82.filehierarchygenerator.util.TempWorkingDirectoryCreator;
 
 public final class FileContentXmlGenerator {
 
-	private final TempWorkingDirectoryCreator tempWorkingDirectoryCreator;
 	private final XmlContent xmlContent;
 	private final XmlFormatter xmlFormatter;
 	private Path directory;
@@ -62,7 +60,7 @@ public final class FileContentXmlGenerator {
 			Files.createFile(path);
 			XmlWriter xmlWriter = new XmlWriter(xmlFormatter);
 			xmlWriter.write(xmlContent);
-			Files.write(path, Arrays.asList(xmlWriter.toString()), Charset.forName("utf8"));
+			Files.write(path, Collections.singletonList(xmlWriter.toString()), Charset.forName("utf8"));
 		} catch (IOException e) {
 			throw new FileContentXmlGeneratorException(e);
 		}
@@ -71,9 +69,8 @@ public final class FileContentXmlGenerator {
 
 	private FileContentXmlGenerator(String fileName) {
 		this.fileName = fileName;
-		this.tempWorkingDirectoryCreator = new TempWorkingDirectoryCreator();
 		try {
-			this.directory = tempWorkingDirectoryCreator.createTempWorkingDirectory();
+			this.directory = TempWorkingDirectoryCreator.createTempWorkingDirectory();
 		} catch (IOException e) {
 			throw new FileContentXmlGeneratorException(e);
 		}
